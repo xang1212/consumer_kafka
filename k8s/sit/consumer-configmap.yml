@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consumer-configmap
+  namespace: consumer-dev
+data:
+  application.yaml: |+
+    spring:
+      datasource:
+        url: jdbc:postgresql://192.168.65.254:5432/market
+        driver-class-name: org.postgresql.Driver
+    kafka:
+      server: 192.168.65.254:29092
+      offset-reset: latest
+      topics:
+        market: market.test.multiple
+      groupid:
+        market: group.market.place
+    server:
+      servlet:
+        context-path: /consumer

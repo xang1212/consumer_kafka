@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer-deployment
+  namespace: consumer-dev
+  labels:
+    app: consumer-label
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: consumer-deployment
+  template:
+    metadata:
+      labels:
+        app: consumer-deployment
+    spec:
+      hostAliases:
+        - ip: 127.0.0.1
+          hostnames:
+            - localhost
+      containers:
+        - name: consumer-deployment
+          image: consumer:4.0
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /consumer/actuator/health
+              port: http
+            failureThreshold: 3
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /consumer/actuator/health
+              port: http
+            failureThreshold: 3
+            periodSeconds: 30
+          env:
+            - name: JAVA_OPTS
+              value: "-Xms256m -Xmx1024m"
+            - name: SPRING_CONFIG
+              value: "/home/app/config/application.yaml"
+            - name: TIME_ZONE
+              value: "-Dlogback.timezone=Asia/Bangkok"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: consumer-secret
+                  key: spring.datasource.username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: consumer-secret
+                  key: spring.datasource.password
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: consumer-volume
+              mountPath: /home/app/config/application.yaml
+              subPath: application.yaml
+      volumes:
+        - name: consumer-volume
+          configMap:
+            name: consumer-configmap

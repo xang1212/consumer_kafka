@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/market
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+kafka:
+  server: localhost:39092
+  offset-reset: latest
+  topics:
+    market: market.topic
+  groupid:
+    market: group.market.topic
+    logging: group.logging.topic
+server:
+  port: 8084
+  servlet:
+    context-path: /consumer
+
